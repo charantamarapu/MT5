@@ -25,6 +25,7 @@
     background: var(--bg);
     color: #f1f5f9;
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -334,9 +335,12 @@
     justify-content: center;
     gap: 20px;
     padding: 16px 24px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     background: rgba(6,13,26,0.95);
     border-top: 1px solid rgba(255,255,255,0.05);
     flex-shrink: 0;
+    position: relative;
+    z-index: 20;
   }
 
   .btn {
@@ -486,6 +490,7 @@
     /* Nav & Controls */
     .controls {
       padding: 12px 10px;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
       gap: 8px;
     }
     .btn {
@@ -1042,6 +1047,30 @@
     if (e.key === 'ArrowRight' || e.key === 'Space') changeSlide(1);
     if (e.key === 'ArrowLeft') changeSlide(-1);
   });
+
+  // Touch setup for mobile swipe navigation
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  document.getElementById('stage').addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, {passive: true});
+
+  document.getElementById('stage').addEventListener('touchend', e => {
+    let touchEndX = e.changedTouches[0].screenX;
+    let touchEndY = e.changedTouches[0].screenY;
+    
+    let diffX = touchStartX - touchEndX;
+    let diffY = Math.abs(touchStartY - touchEndY);
+    
+    // Only trigger swipe if horizontal difference is greater than vertical 
+    // difference to avoid firing on normal vertical scrolling
+    if (Math.abs(diffX) > diffY) {
+      if (diffX > 40) changeSlide(1);  // Swiped left
+      else if (diffX < -40) changeSlide(-1); // Swiped right
+    }
+  }, {passive: true});
 </script>
 </body>
 </html>
